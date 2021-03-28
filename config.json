@@ -1,3 +1,5 @@
 {
-    "appid": "b4e1e17ac67bc34668377259fbe6ab4c"
+    "appid": "b4e1e17ac67bc34668377259fbe6ab4c",
+    "devURI": "http://localhost:4200",
+    "prodURI": ""
 }
