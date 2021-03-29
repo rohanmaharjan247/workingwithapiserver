@@ -22,6 +22,7 @@ var spotifyApi = new SpotifyWebApi({
 var scopes = [
   "user-read-private",
   "user-read-email",
+  "user-top-read",
   "playlist-modify-public",
   "playlist-modify-private",
 ];
@@ -47,7 +48,6 @@ module.exports = (app, config) => {
     var html = spotifyApi.createAuthorizeURL(scopes);
     // "&show_dialog=true"
     res.send(JSON.stringify({ link: html, state: state }));
-  
   });
 
   app.get("/callback", async function (req, res) {
@@ -55,7 +55,7 @@ module.exports = (app, config) => {
     // after checking the state parameter
     console.log("callback called");
 
-     const { code } = req.query;
+    const { code } = req.query;
     // console.log(code);
     // try {
     //   var data = await spotifyApi.authorizationCodeGrant(code);
@@ -229,6 +229,45 @@ module.exports = (app, config) => {
       })
       .catch((err) => {
         console.error(err.data);
+      });
+  });
+
+  app.get("/usertop", (req, res) => {
+    var access_token = req.get("Authorization");
+    var type = req.query.type;    
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/me/top/${type}`,
+      headers: { Authorization: "Bearer " + access_token },
+      params: { limit: "4" },
+    };
+
+    axios(options)
+      .then((playlist) => {
+        res.send(playlist.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
+  app.get("/searchspotify", (req, res) => {
+    var access_token = req.get("Authorization");
+    var searchText = req.query.searchtext;
+    var type = "artist,album,playlist,track";
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/search`,
+      headers: { Authorization: "Bearer " + access_token },
+      params: { q: searchText, type: type },
+    };
+
+    axios(options)
+      .then((playlist) => {
+        res.send(playlist.data);
+      })
+      .catch((err) => {
+        console.error(err);
       });
   });
 };
