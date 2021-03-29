@@ -2,20 +2,17 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const  cookieParser = require('cookie-parser');
-const session = require('express-session');
-const passport = require("passport");
+const swaggerUi = require('swagger-ui-express');
 const fs = require("fs");
 
 const app = express();
 app.use(cors()).use(cookieParser());
-//passport initialization
-app.use(session({ secret: 'secret', resave: true, saveUninitialized: true }))
-app.use(passport.initialize())
-app.use(passport.session())
+
 
 
 const apiUrl = "http://api.openweathermap.org/data/2.5";
 const port = process.env.PORT || 9091;
+swaggerDocument = require('./swagger.json');
 
 const config = fs.readFileSync("./config.json", "utf-8");
 const config_json = JSON.parse(config);
@@ -26,6 +23,8 @@ const stotifyapp = require('./spotifyapp')(app, config_json);
 app.get("/", (request, response) => {
   response.send("Open Weather API");
 });
+
+//app.get('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 app.get("/currentweather", async (request, response) => {
   const weather_response = await axios.get(`${apiUrl}/weather`, {
@@ -116,8 +115,7 @@ app.get('/onecall', async (request, response)=>{
 })
 
 app.listen(port, () => {
-  console.log("App listening to:" + port);
-  console.log("Environment"+ process.env.NODE_ENV || 'development');
+  console.log("App listening to:" + port);  
 });
 
 
