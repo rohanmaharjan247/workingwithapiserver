@@ -117,6 +117,7 @@ app.get('/onecall', async (request, response)=>{
 
 app.listen(port, () => {
   console.log("App listening to:" + port);
+  console.log("Environment"+ process.env.NODE_ENV || 'development');
 });
 
 

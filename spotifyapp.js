@@ -8,7 +8,8 @@ const SpotifyWebApi = require("spotify-web-api-node");
 
 const CLIENT_ID = "9c608a59662d42f59c9e3ff2bc969481";
 const CLIENT_SECRET = "6d1e59eb3ec94e66a3e886b2ba1999e5";
-const redirect_uri = "http://localhost:4200/spotify/callback";
+const redirect_uri = 'https://workingwithapi.herokuapp.com/spotify/callback';
+//"http://localhost:4200/spotify/callback";
 
 var stateKey = "spotify_auth_state";
 var access_token = "",
@@ -19,7 +20,12 @@ var spotifyApi = new SpotifyWebApi({
   clientSecret: CLIENT_SECRET,
   redirectUri: redirect_uri,
 });
-var scopes = ['user-read-private', 'user-read-email','playlist-modify-public','playlist-modify-private']
+var scopes = [
+  "user-read-private",
+  "user-read-email",
+  "playlist-modify-public",
+  "playlist-modify-private",
+];
 
 var generateRandomString = (length) => {
   var text = "";
@@ -72,8 +78,8 @@ module.exports = (app, config) => {
 
   app.get("/spotifyauth", (req, res) => {
     var state = generateRandomString(16);
-    res.cookie(stateKey, state);    
-    var html = spotifyApi.createAuthorizeURL(scopes, state);    
+    res.cookie(stateKey, state);
+    var html = spotifyApi.createAuthorizeURL(scopes, state);
     // "&show_dialog=true"
     res.send(JSON.stringify(html));
     //application requests authorization
@@ -120,7 +126,12 @@ module.exports = (app, config) => {
     var storedState = req.cookies ? req.cookies[stateKey] : null;
 
     if (state === null || state !== storedState) {
-      res.send(JSON.stringify({message:"State mismatch"+ req.cookies[stateKey] + " " + state, result: false}));
+      res.send(
+        JSON.stringify({
+          message: "State mismatch" + req.cookies[stateKey] + " " + state,
+          result: false,
+        })
+      );
     } else {
       res.clearCookie(stateKey);
       const formData = new FormData();
@@ -145,14 +156,14 @@ module.exports = (app, config) => {
             new Buffer(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64"),
         },
       };
-   
+
       axios(authOptions)
         .then((spotifyResponse) => {
           if (spotifyResponse.status === 200) {
             access_token = spotifyResponse.data.access_token;
             refresh_token = spotifyResponse.data.refresh_token;
-           
-            res.send({message: access_token, result: true});
+
+            res.send({ message: access_token, result: true });
             // we can also pass the token to the browser to make requests from there
             // res.redirect(
             //   "/#" +
@@ -162,7 +173,7 @@ module.exports = (app, config) => {
             //     })
             // );
           } else {
-            res.send({message: 'Invalid Token', result: false});
+            res.send({ message: "Invalid Token", result: false });
           }
         })
         .catch((err) => {
@@ -200,8 +211,8 @@ module.exports = (app, config) => {
   });
 
   app.get("/profile", (req, res) => {
-    var access_token = req.get('Authorization');
-  
+    var access_token = req.get("Authorization");
+
     var options = {
       method: "GET",
       url: "https://api.spotify.com/v1/me",
@@ -211,7 +222,7 @@ module.exports = (app, config) => {
     // use the access token to access the Spotify Web API
     axios(options)
       .then((profile) => {
-        res.send(profile.data);        
+        res.send(profile.data);
       })
       .catch((err) => {
         console.error(err.data);
@@ -220,8 +231,8 @@ module.exports = (app, config) => {
   });
 
   app.get("/playlists", (req, res) => {
-    var access_token = req.get('Authorization');
-  
+    var access_token = req.get("Authorization");
+
     var options = {
       method: "GET",
       url: "https://api.spotify.com/v1/me/playlists",
@@ -231,11 +242,48 @@ module.exports = (app, config) => {
     // use the access token to access the Spotify Web API
     axios(options)
       .then((playlist) => {
-        res.send(playlist.data);        
+        res.send(playlist.data);
       })
       .catch((err) => {
         console.error(err.data);
         //res.redirect("http://localhost:9091/spotifyauth");
       });
   });
+
+  app.get("/userplaylist", (req, res) => {
+    
+    var access_token = req.get("Authorization");
+    var userId = req.query.userid;
+
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/users/${userId}/playlists`,
+      headers: { Authorization: "Bearer " + access_token },
+    };
+
+    axios(options).then((userPlaylist)=>{
+      res.send(userPlaylist.data);
+    })
+    .catch((err)=>{
+      console.error(err.data);
+    })
+  });
+
+  app.get('/playlistinfo', (req, res)=>{
+    var access_token = req.get("Authorization");
+    var playlistid = req.query.playlistid;
+
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/playlists/${playlistid}`,
+      headers: { Authorization: "Bearer " + access_token },
+    };
+
+    axios(options).then((playlist)=>{
+      res.send(playlist.data);
+    })
+    .catch((err)=>{
+      console.error(err.data);
+    })
+  })
 };
