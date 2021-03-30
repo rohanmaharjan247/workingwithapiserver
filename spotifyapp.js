@@ -7,8 +7,8 @@ const SpotifyWebApi = require("spotify-web-api-node");
 const CLIENT_ID = "9c608a59662d42f59c9e3ff2bc969481";
 const CLIENT_SECRET = "6d1e59eb3ec94e66a3e886b2ba1999e5";
 const redirect_uri =
-  'https://workingwithapi.herokuapp.com/spotify/callback';
- // "http://localhost:4200/spotify/callback";
+ // 'https://workingwithapi.herokuapp.com/spotify/callback';
+  "http://localhost:4200/spotify/callback";
 
 const stateKey = "spotify_auth_state";
 var access_token = "",
@@ -259,7 +259,7 @@ module.exports = (app, config) => {
       method: "GET",
       url: `https://api.spotify.com/v1/search`,
       headers: { Authorization: "Bearer " + access_token },
-      params: { q: searchText, type: type },
+      params: { q: searchText, type: type, limit: '5' },
     };
 
     axios(options)
