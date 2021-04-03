@@ -7,8 +7,8 @@ const SpotifyWebApi = require("spotify-web-api-node");
 const CLIENT_ID = "9c608a59662d42f59c9e3ff2bc969481";
 const CLIENT_SECRET = "6d1e59eb3ec94e66a3e886b2ba1999e5";
 const redirect_uri =
-  'https://workingwithapi.herokuapp.com/spotify/callback';
- // "http://localhost:4200/spotify/callback";
+ // 'https://workingwithapi.herokuapp.com/spotify/callback';
+  "http://localhost:4200/spotify/callback";
 
 const stateKey = "spotify_auth_state";
 var access_token = "",
@@ -260,6 +260,68 @@ module.exports = (app, config) => {
       url: `https://api.spotify.com/v1/search`,
       headers: { Authorization: "Bearer " + access_token },
       params: { q: searchText, type: type, limit: '5' },
+    };
+
+    axios(options)
+      .then((playlist) => {
+        res.send(playlist.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
+  app.get("/recommendations", (req, res) => {
+    var access_token = req.get("Authorization");
+    var seedartists = req.query.seedartist;
+    var seedgenres = req.query.seedgenre;
+    var seedtracks = req.query.seedtrack;
+    
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/recommendations`,
+      headers: { Authorization: "Bearer " + access_token },
+      params: { seed_artists: seedartists, seed_genres: seedgenres, seed_tracks: seedtracks, limit: '5' },
+    };
+
+    axios(options)
+      .then((playlist) => {
+        res.send(playlist.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
+  app.get("/browsenewrelease", (req, res) => {
+    var access_token = req.get("Authorization");
+    var country = req.query.country;
+    
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/browse/new-releases`,
+      headers: { Authorization: "Bearer " + access_token },
+      params: { country: country, limit: '5' },
+    };
+
+    axios(options)
+      .then((playlist) => {
+        res.send(playlist.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
+  app.get("/browsefeaturedplaylists", (req, res) => {
+    var access_token = req.get("Authorization");
+    var country = req.query.country;
+
+    var options = {
+      method: "GET",
+      url: `https://api.spotify.com/v1/browse/featured-playlists`,
+      headers: { Authorization: "Bearer " + access_token },
+      params: { country: country, limit: '5' },
     };
 
     axios(options)
